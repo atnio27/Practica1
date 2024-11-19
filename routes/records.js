@@ -3,9 +3,10 @@ const router = express.Router();
 
 const Record = require("../models/record.js");
 const Patient = require("../models/patient.js");
+const { authorize } = require("../auth/auth.js");
 
 // Listado de todos los expedietes
-router.get("/", async (req, res) => {
+router.get("/", authorize(["admin", "physio"]), async (req, res) => {
     try {
         const records = await Record.find();
 
@@ -32,7 +33,7 @@ router.get("/", async (req, res) => {
 });
 
 // Buscar expedientes por apellido de pacientes
-router.get("/find", async (req, res) => {
+router.get("/find", authorize(["admin", "physio"]), async (req, res) => {
     const { surname } = req.query;
 
     try {
@@ -91,38 +92,54 @@ router.get("/find", async (req, res) => {
 });
 
 // Obtener detalles de un expediente específico
-router.get("/:id", async (req, res) => {
-    const id = req.params.id;
+router.get(
+    "/:id",
+    authorize(["admin", "physio", "patient"]),
+    async (req, res) => {
+        const patientId = req.params.id;
 
-    try {
-        const record = await Record.findById(id);
+        try {
+            const record = await Record.find({
+                patient: await Patient.findById(patientId),
+            });
 
-        // Si no hay expediente con ese id
-        if (!record) {
-            return res.status(404).json({
-                error: "Record not found",
+            // Si no hay expediente con ese id
+            if (!record) {
+                return res.status(404).json({
+                    error: "Record not found",
+                    result: null,
+                });
+            }
+
+            const rol = req.user.rol;
+            const id = req.user.id;
+
+            if (rol === "patient" && id !== patientId) {
+                return res.status(403).json({
+                    error: "Unauthorised access: You are not the patient",
+                    result: null,
+                });
+            }
+
+            // Si todo va bien
+            res.status(200).json({
+                error: null,
+                result: record,
+            });
+        } catch (error) {
+            // Error en el servidor
+            res.status(500).json({
+                error: "Internal server error: " + error.message,
                 result: null,
             });
         }
-
-        // Si todo va bien
-        res.status(200).json({
-            error: null,
-            result: record,
-        });
-    } catch (error) {
-        // Error en el servidor
-        res.status(500).json({
-            error: "Internal server error: " + error.message,
-            result: null,
-        });
     }
-});
+);
 
 // Insertar un expediente
-router.post("/", async (req, res) => {
+router.post("/", authorize(["admin", "physio"]), async (req, res) => {
     const recordInfo = req.body;
-    const patientId = req.params.id;
+    const patientId = req.body.patient;
 
     // Si no existe el paciente
     if (!patientId) {
@@ -154,41 +171,45 @@ router.post("/", async (req, res) => {
 });
 
 // Añadir consultas a un expediente
-router.post("/:id/appointments", async (req, res) => {
-    const recordId = req.params.id;
-    const appointmentInfo = req.body;
+router.post(
+    "/:id/appointments",
+    authorize(["admin", "physio"]),
+    async (req, res) => {
+        const recordId = req.params.id;
+        const appointmentInfo = req.body;
 
-    try {
-        const record = await Record.findById(recordId);
+        try {
+            const record = await Record.findById(recordId);
 
-        // Si no existe el expediente
-        if (!record) {
-            return res.status(404).json({
-                error: "Record not found",
+            // Si no existe el expediente
+            if (!record) {
+                return res.status(404).json({
+                    error: "Record not found",
+                    result: null,
+                });
+            }
+
+            // Añadir la consulta al expediente
+            record.appointments.push(appointmentInfo);
+
+            await record.save();
+
+            res.status(201).json({
+                error: null,
+                result: record,
+            });
+        } catch (error) {
+            // Error en el servidor
+            res.status(500).json({
+                error: "Internal server error: " + error.message,
                 result: null,
             });
         }
-
-        // Añadir la consulta al expediente
-        record.appointments.push(appointmentInfo);
-
-        await record.save();
-
-        res.status(201).json({
-            error: null,
-            result: record,
-        });
-    } catch (error) {
-        // Error en el servidor
-        res.status(500).json({
-            error: "Internal server error: " + error.message,
-            result: null,
-        });
     }
-});
+);
 
 // Eliminar un expediente
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authorize(["admin", "physio"]), async (req, res) => {
     const recordId = req.params.id;
 
     try {

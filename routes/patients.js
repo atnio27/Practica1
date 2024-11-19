@@ -2,9 +2,12 @@ const express = require("express");
 
 const Patient = require("../models/patient.js");
 const router = express.Router();
+const { authorize } = require("../auth/auth.js");
+const User = require("../models/users.js");
+const bcrypt = require("bcrypt");
 
 // Obtener un listado de todos los pacientes
-router.get("/", async (req, res) => {
+router.get("/", authorize(["admin", "physio"]), async (req, res) => {
     try {
         const patients = await Patient.find();
 
@@ -28,8 +31,8 @@ router.get("/", async (req, res) => {
 });
 
 // Buscar pacientes por nombre o apellidos
-router.get("/find", async (req, res) => {
-    const { surname } = req.query.surname;
+router.get("/find", authorize(["admin", "physio"]), async (req, res) => {
+    const surname = req.query.surname;
     try {
         let patients;
 
@@ -67,37 +70,61 @@ router.get("/find", async (req, res) => {
 });
 
 // Obtener detalles de un paciente específico por ID
-router.get("/:id", async (req, res) => {
-    try {
+router.get(
+    "/:id",
+    authorize(["admin", "physio", "patient"]),
+    async (req, res) => {
         const patientId = req.params.id;
 
-        const patient = await Patient.findById(patientId);
+        try {
+            const patient = await Patient.findById(patientId);
 
-        if (!patient) {
-            return res.status(404).json({
-                error: "Patient not found",
+            // Si no hay paciente con ese id
+            if (!patient) {
+                return res.status(404).json({
+                    error: "Patient not found",
+                    result: null,
+                });
+            }
+
+            const rol = req.user.rol;
+            const id = req.user.id;
+
+            if (rol === "patient" && id !== patientId) {
+                return res.status(403).json({
+                    error: "Unauthorised access",
+                    result: null,
+                });
+            }
+
+            res.status(200).json({
+                error: null,
+                result: patient,
+            });
+        } catch (error) {
+            res.status(500).json({
+                error: "Internal server error: " + error.message,
                 result: null,
             });
         }
-
-        res.status(200).json({
-            error: null,
-            result: patient,
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: "Internal server error: " + error.message,
-            result: null,
-        });
     }
-});
+);
 
 // Insertar un paciente
-router.post("/", async (req, res) => {
+router.post("/", authorize(["admin", "physio"]), async (req, res) => {
+    const newUser = new User({
+        login: req.body.login,
+        password: await bcrypt.hash(req.body.password, 10),
+        rol: "patient",
+    });
+
+    newUser.save();
+
     const patientInfo = req.body;
 
     try {
         const newPatient = new Patient({
+            _id: newUser._id,
             ...patientInfo,
         });
 
@@ -117,7 +144,7 @@ router.post("/", async (req, res) => {
 });
 
 // Actualizar los datos de un paciente
-router.put("/:id", async (req, res) => {
+router.put("/:id", authorize(["admin", "physio"]), async (req, res) => {
     const id = req.params.id;
 
     const patientInfo = req.body;
@@ -150,7 +177,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Eliminar un paciente
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authorize(["admin", "physio"]), async (req, res) => {
     const id = req.params.id;
 
     try {
