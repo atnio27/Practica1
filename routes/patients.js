@@ -3,8 +3,7 @@ const express = require("express");
 const Patient = require("../models/patient.js");
 const router = express.Router();
 const { authorize } = require("../auth/auth.js");
-const User = require("../models/users.js");
-const bcrypt = require("bcrypt");
+const { createUser } = require("../utils/createUser.js");
 
 // Obtener un listado de todos los pacientes
 router.get("/", authorize(["admin", "physio"]), async (req, res) => {
@@ -112,13 +111,13 @@ router.get(
 
 // Insertar un paciente
 router.post("/", authorize(["admin", "physio"]), async (req, res) => {
-    const newUser = new User({
+    const { login, password, rol } = {
         login: req.body.login,
-        password: await bcrypt.hash(req.body.password, 10),
+        password: req.body.password,
         rol: "patient",
-    });
+    };
 
-    newUser.save();
+    const newUser = createUser(login, password, rol);
 
     const patientInfo = req.body;
 

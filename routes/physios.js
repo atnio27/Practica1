@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
 
 const Physio = require("../models/physio.js");
-const User = require("../models/users.js");
 const { authorize } = require("../auth/auth.js");
+const { createUser } = require("../utils/createUser.js");
 
 // Obtener un listado de todos los fisios
 router.get("/", authorize(["admin", "physio", "patient"]), async (req, res) => {
@@ -119,20 +118,7 @@ router.post("/", authorize(["admin"]), async (req, res) => {
         rol: "physio",
     };
 
-    if (!login || !password) {
-        return res.status(400).json({
-            error: "Missing login or password",
-            result: null,
-        });
-    }
-
-    const newUser = new User({
-        login: login,
-        password: await bcrypt.hash(req.body.password, 10),
-        rol: rol,
-    });
-
-    newUser.save();
+    const newUser = createUser(login, password, rol);
 
     const physioInfo = req.body;
 

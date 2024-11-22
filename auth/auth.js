@@ -19,7 +19,6 @@ const generateToken = (user) => {
 const verifyToken = (token) => {
     try {
         const result = jwt.verify(token, process.env.JWT_SECRET);
-
         return {
             valid: true,
             result,
