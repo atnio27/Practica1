@@ -1,0 +1,43 @@
+{% extends "base.njk" %}
+
+{% block titulo %}Libros | Nuevo{% endblock %}
+
+{% block contenido %}
+
+    <h1>Inserción de nuevo libro</h1>
+
+    {% if errores.general %}
+        <p class="alert alert-danger">{{ errores.general }}</p>
+    {% endif %}
+
+    <form action="/libros" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="titulo">Título:</label>
+            {% if errores.titulo %}
+                <p class="text-danger">{{ errores.titulo }}</p>
+            {% endif %}
+            <input type="text" class="form-control" name="titulo" 
+                placeholder="Título del libro..." value="{{ datos.titulo }}">
+        </div>
+        <div class="form-group">
+            <label for="editorial">Editorial:</label>            
+            <input type="text" class="form-control" name="editorial"
+                placeholder="Editorial del libro..." value="{{ datos.editorial }}">
+        </div>
+        <div class="form-group">
+            <label for="precio">Precio:</label>
+            {% if errores.precio %}
+                <p class="text-danger">{{ errores.precio }}</p>
+            {% endif %}
+            <input type="text" class="form-control" name="precio"
+                placeholder="Precio del libro..." value="{{ datos.precio }}">
+        </div>
+        <div class="form-group">
+            <label for="portada">Portada:</label>
+            <input type="file" class="form-control" name="portada"
+                placeholder="Portada del libro..." />
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+
+{% endblock %}

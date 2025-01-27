@@ -32,10 +32,10 @@ app.use(express.json());
 app.set("view engine", "njk");
 
 // Cargar los enrutadores
+app.use(express.static(__dirname + "/node_modules/bootstrap/dist"));
 app.use("/patients", patients);
-app.use("/physios", physios);
-app.use("/records", records);
-app.use("/auth", auth);
+// app.use("/physios", physios);
+// app.use("/records", records);
 
 // Puesta en marcha del servidor
 app.listen(process.env.PORT);
