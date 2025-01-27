@@ -1,0 +1,20 @@
+{% extends "base.njk" %}
+
+{% block titulo %}PhysioCare | Record Detail{% endblock %}
+
+{% block contenido %}
+
+	<h1>Record detail</h1>
+	<div>
+		<p>
+			<strong>Patient:</strong>
+			{{ record.patient }}</p>
+		<p>
+			<strong>Medical record:</strong>
+			{{ record.medicalRecord }}</p>
+		<p>
+			<strong>Appointments:</strong>
+			{{ record.appointments }}</p>
+	</div>
+
+{% endblock %}

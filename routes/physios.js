@@ -1,9 +1,27 @@
-// const express = require("express");
-// const router = express.Router();
+const express = require("express");
 
-// const Physio = require("../models/physio.js");
-// const { authorize } = require("../auth/auth.js");
-// const { createUser } = require("../utils/createUser.js");
+const router = express.Router();
+const Physio = require("../models/physio");
+
+// Listado general
+router.get("/", (req, res) => {
+    Physio.find()
+        .then((result) => {
+            res.render("physios/physios_list", { physios: result });
+        })
+        .catch((error) => {});
+});
+
+// Detalles
+router.get("/:id", (req, res) => {
+    Physio.findById(req.params.id)
+        .then((resultado) => {
+            if (resultado)
+                res.render("physios/physio_detail", { physio: resultado });
+            else res.render("error", { error: "Physio not found" });
+        })
+        .catch((error) => {});
+});
 
 // // Obtener un listado de todos los fisios
 // router.get("/", authorize(["admin", "physio", "patient"]), async (req, res) => {
@@ -208,4 +226,4 @@
 //     }
 // });
 
-// module.exports = router;
+module.exports = router;

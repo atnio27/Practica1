@@ -10,7 +10,6 @@ dotenv.config();
 const patients = require("./routes/patients.js");
 const physios = require("./routes/physios.js");
 const records = require("./routes/records.js");
-const auth = require("./routes/auth.js");
 
 // Conectar con BD en Mongo
 mongoose
@@ -34,8 +33,8 @@ app.set("view engine", "njk");
 // Cargar los enrutadores
 app.use(express.static(__dirname + "/node_modules/bootstrap/dist"));
 app.use("/patients", patients);
-// app.use("/physios", physios);
-// app.use("/records", records);
+app.use("/physios", physios);
+app.use("/records", records);
 
 // Puesta en marcha del servidor
 app.listen(process.env.PORT);

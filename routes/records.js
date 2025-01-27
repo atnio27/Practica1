@@ -1,9 +1,29 @@
-// const express = require("express");
-// const router = express.Router();
+const express = require("express");
+const router = express.Router();
 
-// const Record = require("../models/record.js");
+const Record = require("../models/record.js");
 // const Patient = require("../models/patient.js");
 // const { authorize } = require("../auth/auth.js");
+
+// Listado general
+router.get("/", (req, res) => {
+    Record.find()
+        .then((result) => {
+            res.render("records/records_list", { records: result });
+        })
+        .catch((error) => {});
+});
+
+// Detalles
+router.get("/:id", (req, res) => {
+    Record.findById(req.params.id)
+        .then((resultado) => {
+            if (resultado)
+                res.render("records/record_detail", { record: resultado });
+            else res.render("error", { error: "Physio not found" });
+        })
+        .catch((error) => {});
+});
 
 // // Listado de todos los expedietes
 // router.get("/", authorize(["admin", "physio"]), async (req, res) => {
@@ -237,4 +257,4 @@
 //     }
 // });
 
-// module.exports = router;
+module.exports = router;

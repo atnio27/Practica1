@@ -1,0 +1,33 @@
+{% extends "base.njk" %}
+
+{% block titulo %}PhysioCare | Physio List{% endblock %}
+
+{% block contenido %}
+
+	<h1>Physio list</h1>
+
+	<table width="100%">
+		{% for physio in physios %}
+			<tr>
+				{% if loop.index % 2 == 0 %}
+					<td class="par">{{ physio.name }}</td>
+				{% else %}
+					<td class="impar">{{ physio.name }}</td>
+				{% endif %}
+				<td>
+					<a class="btn btn-success" href="/physios/{{ physio.id }}">Ver ficha</a>
+					<form style="display:inline" action="/physios/{{ physio.id }}" method="post">
+						<input type="hidden" name="_method" value="delete"/>
+						<button type="submit" class="btn btn-danger">Borrar</button>
+					</form>
+					<a class="btn btn-primary" href="/physios/edit/{{ physio.id }}">Editar</a>
+				</td>
+			</tr>
+		{% else %}
+			<tr>
+				<td>No hay libros que mostrar.</td>
+			</tr>
+		{% endfor %}
+	</table>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.njk" %}
+
+{% block titulo %}PhysioCare | Patient List{% endblock %}
+
+{% block contenido %}
+
+	<h1>Patient list</h1>
+
+	<table width="100%">
+		{% for patient in patients %}
+			<tr>
+				{% if loop.index % 2 == 0 %}
+					<td class="par">{{ patient.name }}</td>
+				{% else %}
+					<td class="impar">{{ patient.name }}</td>
+				{% endif %}
+				<td>
+					<a class="btn btn-success" href="/patients/{{ patient.id }}">Ver ficha</a>
+					<form style="display:inline" action="/patients/{{ patient.id }}" method="post">
+						<input type="hidden" name="_method" value="delete"/>
+						<button type="submit" class="btn btn-danger">Borrar</button>
+					</form>
+					<a class="btn btn-primary" href="/patients/edit/{{ patient.id }}">Editar</a>
+				</td>
+			</tr>
+		{% else %}
+			<tr>
+				<td>No hay libros que mostrar.</td>
+			</tr>
+		{% endfor %}
+	</table>
+
+{% endblock %}

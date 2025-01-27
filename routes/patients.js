@@ -1,11 +1,26 @@
 const express = require("express");
 
-const Patient = require("../models/patient.js");
 const router = express.Router();
-const { createUser } = require("../utils/createUser.js");
+const Patient = require("../models/patient");
 
+// Listado general
 router.get("/", (req, res) => {
-    res.render("index");
+    Patient.find()
+        .then((result) => {
+            res.render("patients/patients_list", { patients: result });
+        })
+        .catch((error) => {});
+});
+
+// Detalles
+router.get("/:id", (req, res) => {
+    Patient.findById(req.params.id)
+        .then((resultado) => {
+            if (resultado)
+                res.render("patients/patient_detail", { patient: resultado });
+            else res.render("error", { error: "Patient not found" });
+        })
+        .catch((error) => {});
 });
 
 // Obtener un listado de todos los pacientes
