@@ -2,6 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const nunjucks = require("nunjucks");
 
 dotenv.config();
 
@@ -21,7 +22,14 @@ mongoose
 const app = express();
 
 // Middleware para parsear JSON
+nunjucks.configure("views", {
+    autoescape: true,
+    express: app,
+});
 app.use(express.json());
+
+// Configuración de Nunjucks
+app.set("view engine", "njk");
 
 // Cargar los enrutadores
 app.use("/patients", patients);
