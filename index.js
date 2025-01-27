@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const nunjucks = require("nunjucks");
+const methodOverride = require("method-override");
 
 dotenv.config();
 
@@ -20,17 +21,28 @@ mongoose
 // Inicializar Express
 const app = express();
 
-// Middleware para parsear JSON
+// Configuramos motor Nunjucks
 nunjucks.configure("views", {
     autoescape: true,
     express: app,
 });
-app.use(express.json());
 
-// Configuración de Nunjucks
+// Asignación del motor de plantillas
 app.set("view engine", "njk");
 
-// Cargar los enrutadores
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// Middleware para procesar otras peticiones que no sean GET o POST
+app.use(
+    methodOverride(function (req, res) {
+        if (req.body && typeof req.body === "object" && "_method" in req.body) {
+            let method = req.body._method;
+            delete req.body._method;
+            return method;
+        }
+    })
+);
 app.use(express.static(__dirname + "/node_modules/bootstrap/dist"));
 app.use("/patients", patients);
 app.use("/physios", physios);

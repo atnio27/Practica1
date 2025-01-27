@@ -23,6 +23,17 @@ router.get("/:id", (req, res) => {
         .catch((error) => {});
 });
 
+// Delete
+router.delete("/:id", (req, res) => {
+    Physio.findByIdAndDelete(req.params.id)
+        .then((resultado) => {
+            res.redirect(req.baseUrl);
+        })
+        .catch((error) => {
+            res.render("error", { error: "Error deleting" });
+        });
+});
+
 // // Obtener un listado de todos los fisios
 // router.get("/", authorize(["admin", "physio", "patient"]), async (req, res) => {
 //     try {

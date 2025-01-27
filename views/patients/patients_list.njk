@@ -15,12 +15,13 @@
 					<td class="impar">{{ patient.name }}</td>
 				{% endif %}
 				<td>
-					<a class="btn btn-success" href="/patients/{{ patient.id }}">Ver ficha</a>
+					<a class="btn btn-primary" href="/patients/edit/{{ patient.id }}">Edit</a>
 					<form style="display:inline" action="/patients/{{ patient.id }}" method="post">
 						<input type="hidden" name="_method" value="delete"/>
-						<button type="submit" class="btn btn-danger">Borrar</button>
+						<button type="submit" class="btn btn-danger">Delete</button>
 					</form>
-					<a class="btn btn-primary" href="/patients/edit/{{ patient.id }}">Editar</a>
+					<a class="btn btn-success" href="/patients/{{ patient.id }}">Details</a>
+
 				</td>
 			</tr>
 		{% else %}

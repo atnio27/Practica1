@@ -15,12 +15,12 @@
 					<td class="impar">{{ record.patient }}</td>
 				{% endif %}
 				<td>
-					<a class="btn btn-success" href="/records/{{ record.id }}">Ver ficha</a>
+					<a class="btn btn-success" href="/records/{{ record.id }}">Details</a>
+					<a class="btn btn-primary" href="/records/edit/{{ record.id }}">Editar</a>
 					<form style="display:inline" action="/records/{{ record.id }}" method="post">
 						<input type="hidden" name="_method" value="delete"/>
-						<button type="submit" class="btn btn-danger">Borrar</button>
+						<button type="submit" class="btn btn-danger">Delete</button>
 					</form>
-					<a class="btn btn-primary" href="/records/edit/{{ record.id }}">Editar</a>
 				</td>
 			</tr>
 		{% else %}

@@ -25,6 +25,17 @@ router.get("/:id", (req, res) => {
         .catch((error) => {});
 });
 
+// Delete
+router.delete("/:id", (req, res) => {
+    Record.findByIdAndDelete(req.params.id)
+        .then((resultado) => {
+            res.redirect(req.baseUrl);
+        })
+        .catch((error) => {
+            res.render("error", { error: "Error deleting" });
+        });
+});
+
 // // Listado de todos los expedietes
 // router.get("/", authorize(["admin", "physio"]), async (req, res) => {
 //     try {
