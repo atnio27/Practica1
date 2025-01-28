@@ -7,7 +7,7 @@ const appointmentSchema = new mongoose.Schema({
     },
     physio: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Physio",
+        ref: "Physios",
         required: true,
     },
     diagnosis: {
@@ -29,7 +29,7 @@ const appointmentSchema = new mongoose.Schema({
 const recordSchema = new mongoose.Schema({
     patient: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
+        ref: "Patients",
         required: true,
         unique: true,
     },

@@ -21,12 +21,9 @@
 						<button type="submit" class="btn btn-danger">Delete</button>
 					</form>
 					<a class="btn btn-success" href="/patients/{{ patient.id }}">Details</a>
+					<a class="btn btn-primary" href="/patients/edit/{{ patient.id }}">Create appointment</a>
 
 				</td>
-			</tr>
-		{% else %}
-			<tr>
-				<td>No hay libros que mostrar.</td>
 			</tr>
 		{% endfor %}
 	</table>

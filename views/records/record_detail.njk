@@ -8,13 +8,44 @@
 	<div>
 		<p>
 			<strong>Patient:</strong>
-			{{ record.patient }}</p>
+			{{ record.patient.name}}
+			{{record.patient.surname }}</p>
 		<p>
 			<strong>Medical record:</strong>
 			{{ record.medicalRecord }}</p>
 		<p>
 			<strong>Appointments:</strong>
-			{{ record.appointments }}</p>
+			{% if record.appointments.length === 0 %}
+				No appointments
+			{% endif %}
+			<table class="table table-striped table-bordered">
+				<thead class="thead-dark">
+					<tr>
+						<th>Date</th>
+						<th>Physio</th>
+						<th>Diagnosis</th>
+						<th>Treatment</th>
+						<th>Observations</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for appointment in record.appointments %}
+						<tr>
+							<td>{{ appointment.date }}</td>
+							<td>{{ appointment.physio.name }}
+								{{appointment.physio.surname}}</td>
+							<td>{{ appointment.diagnosis }}</td>
+							<td>{{ appointment.treatment }}</td>
+							<td>{{ appointment.observations }}</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="5">No appointments found.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</p>
 	</div>
 
 {% endblock %}
