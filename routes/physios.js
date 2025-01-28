@@ -1,37 +1,41 @@
 const express = require("express");
 
+const upload = require(__dirname + "/../utils/uploads.js");
 const router = express.Router();
 const Physio = require("../models/physio");
 
 // Listado general
-router.get("/", (req, res) => {
-    Physio.find()
-        .then((result) => {
-            res.render("physios/physios_list", { physios: result });
-        })
-        .catch((error) => {});
+router.get("/", async (req, res) => {
+    try {
+        const physios = await Physio.find();
+        res.render("physios/physios_list", { physios });
+    } catch (error) {
+        res.render("error", { error: error });
+    }
 });
 
 // Detalles
-router.get("/:id", (req, res) => {
-    Physio.findById(req.params.id)
-        .then((resultado) => {
-            if (resultado)
-                res.render("physios/physio_detail", { physio: resultado });
-            else res.render("error", { error: "Physio not found" });
-        })
-        .catch((error) => {});
+router.get("/:id", async (req, res) => {
+    try {
+        const physio = await Physio.findById(req.params.id);
+        if (physio) {
+            res.render("physios/physio_detail", { physio });
+        } else {
+            res.render("error", { error: "Physio not found" });
+        }
+    } catch (error) {
+        res.render("error", { error: error });
+    }
 });
 
 // Delete
-router.delete("/:id", (req, res) => {
-    Physio.findByIdAndDelete(req.params.id)
-        .then((resultado) => {
-            res.redirect(req.baseUrl);
-        })
-        .catch((error) => {
-            res.render("error", { error: "Error deleting" });
-        });
+router.delete("/:id", async (req, res) => {
+    try {
+        await Physio.findByIdAndDelete(req.params.id);
+        res.redirect(req.baseUrl);
+    } catch (error) {
+        res.render("error", { error: "Error deleting" });
+    }
 });
 
 // // Obtener un listado de todos los fisios

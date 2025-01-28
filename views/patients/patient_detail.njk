@@ -21,6 +21,10 @@
 		<p>
 			<strong>Insurance number:</strong>
 			{{ patient.insuranceNumber }}</p>
+		{% if patient.image %}
+			<strong>Image:</strong>
+			<p><img src="{{ patient.image }}"></p>
+		{% endif %}
 	</div>
 
 {% endblock %}

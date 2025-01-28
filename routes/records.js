@@ -28,14 +28,13 @@ router.get("/:id", async (req, res) => {
 });
 
 // Delete
-router.delete("/:id", (req, res) => {
-    Record.findByIdAndDelete(req.params.id)
-        .then((resultado) => {
-            res.redirect(req.baseUrl);
-        })
-        .catch((error) => {
-            res.render("error", { error: "Error deleting" });
-        });
+router.delete("/:id", async (req, res) => {
+    try {
+        await Record.findByIdAndDelete(req.params.id);
+        res.redirect(req.baseUrl);
+    } catch (error) {
+        res.render("error", { error: "Error deleting" });
+    }
 });
 
 // // Listado de todos los expedietes
