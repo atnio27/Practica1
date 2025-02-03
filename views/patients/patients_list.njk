@@ -6,6 +6,22 @@
 
 	<h1>Patient list</h1>
 
+	<form method="GET" action="/patients" class="mb-4">
+		<div class="form-row" style="display: flex; flex-direction: row; gap: 10px;">
+			<div class="form-group col-md-4">
+				<label for="searchName">Search by Name:</label>
+				<input type="text" class="form-control" id="searchName" name="name" value="{{ filter.name or '' }}" placeholder="Enter name">
+			</div>
+			<div class="form-group col-md-4">
+				<label for="searchSurname">Search by Surname:</label>
+				<input type="text" class="form-control" id="searchSurname" name="surname" value="{{ filter.surname or '' }}" placeholder="Enter surname">
+			</div>
+			<div class="form-group col-md-4 align-self-end">
+				<button type="submit" class="btn btn-primary">Search</button>
+			</div>
+		</div>
+	</form>
+
 	<table width="100%">
 		{% for patient in patients %}
 			<tr>
@@ -15,13 +31,13 @@
 					<td class="impar">{{ patient.name }}</td>
 				{% endif %}
 				<td>
-					<a class="btn btn-primary" href="/patients/edit/{{ patient.id }}">Edit</a>
-					<form style="display:inline" action="/patients/{{ patient.id }}" method="post">
+					<a class="btn btn-primary" href="/patients/{{ patient._id }}/edit">Edit</a>
+					<form style="display:inline" action="/patients/{{ patient._id }}" method="post">
 						<input type="hidden" name="_method" value="delete"/>
 						<button type="submit" class="btn btn-danger">Delete</button>
 					</form>
-					<a class="btn btn-success" href="/patients/{{ patient.id }}">Details</a>
-					<a class="btn btn-primary" href="/patients/edit/{{ patient.id }}">Create appointment</a>
+					<a class="btn btn-success" href="/patients/{{ patient._id }}">Details</a>
+					<a class="btn btn-primary" href="/patients/edit/{{ patient._id }}">Create appointment</a>
 
 				</td>
 			</tr>

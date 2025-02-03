@@ -15,12 +15,12 @@
 					<td class="impar">{{ physio.name }}</td>
 				{% endif %}
 				<td>
-					<a class="btn btn-primary" href="/physios/edit/{{ physio.id }}">Edit</a>
-					<form style="display:inline" action="/physios/{{ physio.id }}" method="post">
+					<a class="btn btn-primary" href="/physios/edit/{{ physio._id }}">Edit</a>
+					<form style="display:inline" action="/physios/{{ physio._id }}" method="post">
 						<input type="hidden" name="_method" value="delete"/>
 						<button type="submit" class="btn btn-danger">Delete</button>
 					</form>
-					<a class="btn btn-success" href="/physios/{{ physio.id }}">Details</a>
+					<a class="btn btn-success" href="/physios/{{ physio._id }}">Details</a>
 
 				</td>
 			</tr>

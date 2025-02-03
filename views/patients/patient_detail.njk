@@ -23,8 +23,9 @@
 			{{ patient.insuranceNumber }}</p>
 		{% if patient.image %}
 			<strong>Image:</strong>
-			<p><img src="{{ patient.image }}"></p>
+			<p><img src="/public/uploads/{{ patient.image }}"></p>
 		{% endif %}
+		<a class="btn btn-primary" href="/patients/{{ patient._id }}/edit">Edit</a>
 	</div>
 
 {% endblock %}

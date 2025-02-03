@@ -12,10 +12,10 @@
 				<td class="par">{{ record.patient.name}}
 					{{record.patient.surname }}</td>
 				<td>
-					<a class="btn btn-success" href="/records/{{ record.id }}">Details</a>
-					<a class="btn btn-primary" href="/records/edit/{{ record.id }}">Add appointment</a>
-					<a class="btn btn-primary" href="/records/edit/{{ record.id }}">Edit</a>
-					<form style="display:inline" action="/records/{{ record.id }}" method="post">
+					<a class="btn btn-success" href="/records/{{ record._id }}">Details</a>
+					<a class="btn btn-primary" href="/records/edit/{{ record._id }}">Add appointment</a>
+					<a class="btn btn-primary" href="/records/edit/{{ record._id }}">Edit</a>
+					<form style="display:inline" action="/records/{{ record._id }}" method="post">
 						<input type="hidden" name="_method" value="delete"/>
 						<button type="submit" class="btn btn-danger">Delete</button>
 					</form>

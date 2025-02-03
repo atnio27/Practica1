@@ -1,113 +1,30 @@
-{% extends "base.njk" %}
-
-{% block titulo %}Patient | New{% endblock %}
-
-{# {% block contenido %}
-
-	<h1>New Patient</h1>
-
-	<form action="/patients" method="post" enctype="multipart/form-data">
-		<div class="form-group">
-			<label for="name">Name:</label>
-			{% if errors.name %}
-				<p class="text-danger">{{ errors.name }}</p>
-			{% endif %}
-			<input type="text" class="form-control" name="name" 
-                placeholder="Patient name..." value="{{ datos.titulo }}">
-		</div>
-		<div class="form-group">
-			<label for="Surname">Surname:</label>
-			<input type="text" class="form-control" name="Surname"
-                placeholder="Editorial del libro..." value="{{ datos.editorial }}">
-		</div>
-		<div class="form-group">
-			<label for="precio">Precio:</label>
-			{% if errores.precio %}
-				<p class="text-danger">{{ errores.precio }}</p>
-			{% endif %}
-			<input type="text" class="form-control" name="precio"
-                placeholder="Precio del libro..." value="{{ datos.precio }}">
-		</div>
-		<div class="form-group">
-			<label for="portada">Portada:</label>
-			<input type="file" class="form-control" name="portada"
-                placeholder="Portada del libro..."/>
-		</div>
-		<button type="submit" class="btn btn-primary">Enviar</button>
-	</form>
-
-{% endblock %} #}
+{% extends "../base.njk" %}
 
 {% block contenido %}
-	<h1>Add Patient</h1>
+	<div class="container mt-5">
+		<h1 class="mb-4">Add Patient</h1>
 
-	<form action="/patients" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-		{# <div class="form-group">
-			<label for="login">Login:</label>
-			{% if errors.login %}
-				<p class="text-danger">{{ errors.login }}</p>
-			{% endif %}
-			<input type="text" class="form-control" id="login" name="login" value="{{ patient.login }}" required>
-		</div> #}
+		<form method="POST" action="/patients/" enctype="multipart/form-data">
+			{# <div class="form-group mb-3">
+				<label for="login">Login:</label>
+				<input type="text" class="form-control" id="login" name="login" value="{{ patient.login }}" required>
+				{% if errors.login %}
+					<p class="text-danger">{{ errors.login }}</p>
+				{% endif %}
+			</div>
 
-		{# <div class="form-group">
-			<label for="password">Password:</label>
-			{% if errors.password %}
-				<p class="text-danger">{{ errors.password }}</p>
-			{% endif %}
-			<input type="password" class="form-control" id="password" name="password" required>
-		</div> #}
+			<div class="form-group mb-3">
+				<label for="password">Password:</label>
+				<input type="password" class="form-control" id="password" name="password" required>
+				{% if errors.password %}
+					<p class="text-danger">{{ errors.password }}</p>
+				{% endif %}
+			</div> #}
 
-		<div class="form-group">
-			<label for="name">Name:</label>
+			{% include "../patients/patient_form.njk" %}
 
-			<input type="text" class="form-control" id="name" name="name" value="{{ patient.name }}" required>
-			{% if errors.name %}
-				<p class="text-danger">{{ errors.name }}</p>
-			{% endif %}
-		</div>
-
-		<div class="form-group">
-			<label for="surname">Surname:</label>
-
-			<input type="text" class="form-control" id="surname" name="surname" value="{{ patient.surname }}" required>
-			{% if errors.surname %}
-				<p class="text-danger">{{ errors.surname }}</p>
-			{% endif %}
-		</div>
-		<br>
-		<div class="form-group">
-			<label for="birthDate">Birth Date:</label>
-
-			<input type="date" class="form-control" id="birthDate" name="birthDate" value="{{ patient.birthDate }}" required>
-			{% if errors.birthDate %}
-				<p class="text-danger">{{ errors.birthDate }}</p>
-			{% endif %}
-		</div>
-		<br>
-		<div class="form-group">
-			<label for="address">Address:</label>
-
-			<input type="text" class="form-control" id="address" name="address" value="{{ patient.address }}" required>
-			{% if errors.address %}
-				<p class="text-danger">{{ errors.address }}</p>
-			{% endif %}
-		</div>
-		<div class="form-group">
-			<label for="insuranceNumber">Insurance Number:</label>
-
-			<input type="text" class="form-control" id="insuranceNumber" name="insuranceNumber" value="{{ patient.insuranceNumber }}" required>
-			{% if errors.insuranceNumber %}
-				<p class="text-danger">{{ errors.insuranceNumber }}</p>
-			{% endif %}
-		</div>
-		<br>
-		<div class="form-group">
-			<label for="image">Image:</label>
-			<input type="file" class="form-control" id="image" name="image">
-		</div>
-		<br>
-		<button type="submit" class="btn btn-primary">Save Changes</button>
-		<a href="/patients/{{ patient._id }}" class="btn btn-secondary">Cancel</a>
-	</form>
+			<button type="submit" class="btn btn-primary">Save</button>
+			<a href="/patients/{{ patient._id }}" class="btn btn-secondary ml-2">Cancel</a>
+		</form>
+	</div>
 {% endblock %}

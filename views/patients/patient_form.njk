@@ -1,0 +1,44 @@
+<div class="form-group mb-3">
+	<label for="name">Name:</label>
+	<input type="text" class="form-control" id="name" name="name" value="{{ patient.name }}" required>
+	{% if errors.name %}
+		<p class="text-danger">{{ errors.name }}</p>
+	{% endif %}
+</div>
+
+<div class="form-group mb-3">
+	<label for="surname">Surname:</label>
+	<input type="text" class="form-control" id="surname" name="surname" value="{{ patient.surname }}" required>
+	{% if errors.surname %}
+		<p class="text-danger">{{ errors.surname }}</p>
+	{% endif %}
+</div>
+
+<div class="form-group mb-3">
+	<label for="birthDate">Birth Date:</label>
+	<input type="date" class="form-control" id="birthDate" name="birthDate" value="{{ patient.birthDate }}" required>
+	{% if errors.birthDate %}
+		<p class="text-danger">{{ errors.birthDate }}</p>
+	{% endif %}
+</div>
+
+<div class="form-group mb-3">
+	<label for="address">Address:</label>
+	<input type="text" class="form-control" id="address" name="address" value="{{ patient.address }}">
+	{% if errors.address %}
+		<p class="text-danger">{{ errors.address }}</p>
+	{% endif %}
+</div>
+
+<div class="form-group mb-3">
+	<label for="insuranceNumber">Insurance Number:</label>
+	<input type="text" class="form-control" id="insuranceNumber" name="insuranceNumber" value="{{ patient.insuranceNumber }}" required>
+	{% if errors.insuranceNumber %}
+		<p class="text-danger">{{ errors.insuranceNumber }}</p>
+	{% endif %}
+</div>
+
+<div class="form-group mb-3">
+	<label for="image">Image:</label>
+	<input type="file" class="form-control" name="image"/>
+</div>

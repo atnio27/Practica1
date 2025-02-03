@@ -3,23 +3,26 @@ const express = require("express");
 const upload = require(__dirname + "/../utils/uploads.js");
 const router = express.Router();
 const Patient = require("../models/patient");
+const Record = require("../models/record");
 
-// Listado general
-router.get("/", async (req, res) => {
-    try {
-        const patients = await Patient.find();
-        res.render("patients/patients_list", { patients });
-    } catch (error) {
-        res.render("error", { error: error });
-    }
-});
-
-// Formulario de nuevo libro
+// .get
 router.get("/new", (req, res) => {
     res.render("patients/patient_add");
 });
 
-// Detalles
+router.get("/:id/edit", async (req, res) => {
+    try {
+        const patient = await Patient.findById(req.params.id);
+        if (patient) {
+            res.render("patients/patient_edit", { patient });
+        } else {
+            res.render("error", { error: "Patient not found" });
+        }
+    } catch (error) {
+        res.render("error", { error: "Patient not found" });
+    }
+});
+
 router.get("/:id", async (req, res) => {
     try {
         const patient = await Patient.findById(req.params.id);
@@ -33,17 +36,111 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-// Delete
-router.delete("/:id", async (req, res) => {
+router.get("/", async (req, res) => {
+    const { name, surname } = req.query;
+
     try {
-        await Patient.findByIdAndDelete(req.params.id);
-        res.redirect(req.baseUrl);
+        const query = {};
+        if (name || surname) {
+            const conditions = [];
+            if (name)
+                conditions.push({
+                    name: { $regex: name.trim(), $options: "i" },
+                });
+            if (surname)
+                conditions.push({
+                    surname: { $regex: surname.trim(), $options: "i" },
+                });
+            if (conditions.length > 0) query.$and = conditions;
+        }
+
+        let patients = await Patient.find(query);
+
+        if (patients.length === 0) {
+            return res.status(404).render("error", {
+                title: "Patients Not Found",
+                error: "No patients found with those criteria.",
+                code: 404,
+            });
+        }
+
+        patients = await Promise.all(
+            patients.map(async (patient) => ({
+                ...patient.toObject(),
+                hasRecord: await hasRecord(patient._id),
+            }))
+        );
+
+        res.render("patients/patients_list", {
+            title: "Patients List",
+            patients,
+            filter: { name, surname },
+        });
     } catch (error) {
-        res.render("error", { error: "Error deleting" });
+        res.status(500).render("error", {
+            title: "Error",
+            error: "An error occurred while fetching patients.",
+            code: 500,
+        });
     }
 });
 
-// Insert
+// .post
+// edit
+router.post("/:id", upload.upload.single("image"), async (req, res) => {
+    try {
+        const patient = await Patient.findById(req.params.id);
+
+        if (patient) {
+            patient.name = req.body.name;
+            patient.surname = req.body.surname;
+            patient.birthDate = req.body.birthDate;
+            patient.address = req.body.address;
+            patient.insuranceNumber = req.body.insuranceNumber;
+            if (req.file) patient.image = req.file.filename;
+
+            await patient.save();
+            res.redirect(req.baseUrl);
+        } else {
+            res.render("error", { error: "Patient not found" });
+        }
+    } catch (error) {
+        let errors = {
+            general: "Error editing patient",
+        };
+        if (error.errors) {
+            if (error.errors.name) {
+                errors.name = error.errors.name.message;
+            }
+            if (error.errors.surname) {
+                errors.surname = error.errors.surname.message;
+            }
+            if (error.errors.birthDate) {
+                errors.birthDate = error.errors.birthDate.message;
+            }
+            if (error.errors.address) {
+                errors.address = error.errors.address.message;
+            }
+            if (error.errors.insuranceNumber) {
+                errors.insuranceNumber = error.errors.insuranceNumber.message;
+            }
+        }
+
+        res.render("patients/patient_edit", {
+            errors: errors,
+            patient: {
+                _id: req.params.id,
+                name: req.body.name,
+                surname: req.body.surname,
+                birthDate: req.body.birthDate,
+                address: req.body.address,
+                insuranceNumber: req.body.insuranceNumber,
+                image: req.file ? req.file.filename : patient.image,
+            },
+        });
+    }
+});
+
 router.post("/", upload.upload.single("image"), async (req, res) => {
     const {
         name,
@@ -58,7 +155,7 @@ router.post("/", upload.upload.single("image"), async (req, res) => {
     try {
         let image = null;
         if (req.file) {
-            image = `/public/uploads/${req.file.filename}`;
+            image = req.file.filename;
         }
 
         const newPatient = new Patient({
@@ -144,203 +241,19 @@ router.post("/", upload.upload.single("image"), async (req, res) => {
     }
 });
 
-// Obtener un listado de todos los pacientes
-// router.get("/", authorize(["admin", "physio"]), async (req, res) => {
-//     try {
-//         const patients = await Patient.find();
+// .delete
+router.delete("/:id", async (req, res) => {
+    try {
+        await Patient.findByIdAndDelete(req.params.id);
+        res.redirect(req.baseUrl);
+    } catch (error) {
+        res.render("error", { error: "Error deleting" });
+    }
+});
 
-//         if (patients.length === 0) {
-//             return res.status(404).json({
-//                 error: "Patients not found",
-//                 result: null,
-//             });
-//         }
-
-//         res.status(200).json({
-//             error: null,
-//             result: patients,
-//         });
-//     } catch (error) {
-//         res.status(500).json({
-//             error: "Internal server error: " + error.message,
-//             result: null,
-//         });
-//     }
-// });
-
-// // Buscar pacientes por nombre o apellidos
-// router.get("/find", authorize(["admin", "physio"]), async (req, res) => {
-//     const surname = req.query.surname;
-//     try {
-//         let patients;
-
-//         // Control si hay apellido o no
-//         if (surname) {
-//             patients = await Patient.find({
-//                 surname: {
-//                     $regex: surname,
-//                     $options: "i",
-//                 },
-//             });
-//         } else {
-//             patients = await Patient.find();
-//         }
-
-//         // Si no se han encontrado pacientes
-//         if (patients.length === 0) {
-//             return res.status(404).json({
-//                 error: "There are no patients with that surname",
-//                 result: null,
-//             });
-//         }
-
-//         // Si todo ha ido bien
-//         res.status(200).json({
-//             error: null,
-//             result: patients,
-//         });
-//     } catch (error) {
-//         res.status(500).json({
-//             error: "Internal server error: " + error.message,
-//             result: null,
-//         });
-//     }
-// });
-
-// // Obtener detalles de un paciente específico por ID
-// router.get(
-//     "/:id",
-//     authorize(["admin", "physio", "patient"]),
-//     async (req, res) => {
-//         const patientId = req.params.id;
-
-//         try {
-//             const patient = await Patient.findById(patientId);
-
-//             // Si no hay paciente con ese id
-//             if (!patient) {
-//                 return res.status(404).json({
-//                     error: "Patient not found",
-//                     result: null,
-//                 });
-//             }
-
-//             const rol = req.user.rol;
-//             const id = req.user.id;
-
-//             if (rol === "patient" && id !== patientId) {
-//                 return res.status(403).json({
-//                     error: "Unauthorised access",
-//                     result: null,
-//                 });
-//             }
-
-//             res.status(200).json({
-//                 error: null,
-//                 result: patient,
-//             });
-//         } catch (error) {
-//             res.status(500).json({
-//                 error: "Internal server error: " + error.message,
-//                 result: null,
-//             });
-//         }
-//     }
-// );
-
-// // Insertar un paciente
-// router.post("/", authorize(["admin", "physio"]), async (req, res) => {
-//     const { login, password, rol } = {
-//         login: req.body.login,
-//         password: req.body.password,
-//         rol: "patient",
-//     };
-
-//     const newUser = createUser(login, password, rol);
-
-//     const patientInfo = req.body;
-
-//     try {
-//         const newPatient = new Patient({
-//             _id: newUser._id,
-//             ...patientInfo,
-//         });
-
-//         const savedPatient = await newPatient.save();
-
-//         // Si todo va bien
-//         res.status(201).json({
-//             error: null,
-//             result: savedPatient,
-//         });
-//     } catch (error) {
-//         res.status(400).json({
-//             error: "Internal server error: " + error.message,
-//             result: null,
-//         });
-//     }
-// });
-
-// // Actualizar los datos de un paciente
-// router.put("/:id", authorize(["admin", "physio"]), async (req, res) => {
-//     const id = req.params.id;
-
-//     const patientInfo = req.body;
-
-//     try {
-//         const updatedPatient = await Patient.findByIdAndUpdate(id, {
-//             ...patientInfo,
-//         });
-
-//         // Si el paciente no se ha encontrado
-//         if (!updatedPatient) {
-//             return res.status(400).json({
-//                 error: "Patient not found",
-//                 result: null,
-//             });
-//         }
-
-//         // Si todo va bien
-//         res.status(200).json({
-//             error: null,
-//             result: updatedPatient,
-//         });
-//     } catch (error) {
-//         // Error en el servidor
-//         res.status(500).json({
-//             error: "Internal server error: " + error.message,
-//             result: null,
-//         });
-//     }
-// });
-
-// // Eliminar un paciente
-// router.delete("/:id", authorize(["admin", "physio"]), async (req, res) => {
-//     const id = req.params.id;
-
-//     try {
-//         const deletedPatient = await Patient.findByIdAndDelete(id);
-
-//         // Si el paciente no se ha encontrado
-//         if (!deletedPatient) {
-//             return res.status(404).json({
-//                 error: "Patient not found",
-//                 result: null,
-//             });
-//         }
-
-//         // Si todo va bien
-//         res.status(200).json({
-//             error: null,
-//             result: deletedPatient,
-//         });
-//     } catch (error) {
-//         // Error en el servidor
-//         res.status(500).json({
-//             error: "Internal server error: " + error.message,
-//             result: null,
-//         });
-//     }
-// });
+const hasRecord = async (patientId) => {
+    const record = await Record.findOne({ patient: patientId });
+    return !!record;
+};
 
 module.exports = router;
