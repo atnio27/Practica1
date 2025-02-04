@@ -20,5 +20,9 @@
     {% else %}
         <a class="btn btn-dark" href="/auth/login">Login</a>
     {% endif %}
-
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <!-- Profile Button -->
+    {% if session.user and(session.user.rol == 'patient' or session.user.rol == 'physio') %}
+        <a class="btn btn-darl" href="/{{ 'patients' if session.user.rol == 'patient' else 'physios' }}/{{ session.user.id }}">Profile</a>
+    {% endif %}
 </div>
