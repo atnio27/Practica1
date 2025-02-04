@@ -1,31 +1,53 @@
 {% extends "base.njk" %}
 
-{% block titulo %}PhysioCare | Record List{% endblock %}
-
 {% block contenido %}
+	<div class="container mt-5">
+		<h1 class="mb-4">Records List</h1>
 
-	<h1>Record list</h1>
+		<!-- Search Form -->
+		<form method="GET" action="/records/" class="mb-4">
+			<div class="form-row" style="display: flex; flex-direction: row; gap: 10px;">
+				<div class="form-group col-md-6">
+					<label for="searchSurname">Search by Surname:</label>
+					<input type="text" class="form-control" id="searchSurname" name="surname" value="{{ filter.surname or '' }}" placeholder="Enter surname">
+				</div>
+				<div class="form-group col-md-6 align-self-end">
+					<button type="submit" class="btn btn-primary">Search</button>
+				</div>
+			</div>
+		</form>
 
-	<table width="100%">
-		{% for record in records %}
-			<tr>
-				<td class="par">{{ record.patient.name}}
-					{{record.patient.surname }}</td>
-				<td>
-					<a class="btn btn-success" href="/records/{{ record._id }}">Details</a>
-					<a class="btn btn-primary" href="/records/edit/{{ record._id }}">Add appointment</a>
-					<a class="btn btn-primary" href="/records/edit/{{ record._id }}">Edit</a>
-					<form style="display:inline" action="/records/{{ record._id }}" method="post">
-						<input type="hidden" name="_method" value="delete"/>
-						<button type="submit" class="btn btn-danger">Delete</button>
-					</form>
-				</td>
-			</tr>
+		{% if records.length > 0 %}
+			<table class="table table-bordered table-striped">
+				<thead class="thead-dark">
+					<tr>
+						<th>Patient Name</th>
+						<th>Patient Surname</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for record in records %}
+						<tr>
+							<td>{{ record.patient.name }}</td>
+							<td>{{ record.patient.surname }}</td>
+							<td>
+								<!-- View Details Button -->
+								<a href="/records/{{ record.patient._id }}" class="btn btn-primary btn-sm">View Details</a>
+
+								<!-- Add Appointment Button -->
+								<a href="/records/{{ record.patient._id }}/appointments/new" class="btn btn-success btn-sm ml-2">Add Appointment</a>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
 		{% else %}
-			<tr>
-				<td>There is no records.</td>
-			</tr>
-		{% endfor %}
-	</table>
-
+			<div class="alert alert-info" role="alert">
+            No records available to display.
+        </div>
+		{% endif %}
+	</div>
+	<br>
+	<a class="btn btn-dark" href="/records/new">New Appointment</a>
 {% endblock %}

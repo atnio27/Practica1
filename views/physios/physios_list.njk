@@ -6,6 +6,25 @@
 
 	<h1>Physio list</h1>
 
+	<form method="GET" action="/physios" class="mb-4">
+		<div class="form-row" style="display: flex; flex-direction: row; gap: 10px;">
+			<div class="form-group col-md-6">
+				<label for="specialty">Specialty:</label>
+				<select class="form-control" id="specialty" name="specialty">
+					<option value="" {% if not physio.specialty %}selected{% endif %}>Select Specialty</option>
+					<option value="Sports" {% if physio.specialty == "Sports" %}selected{% endif %}>Sports</option>
+					<option value="Neurological" {% if physio.specialty == "Neurological" %}selected{% endif %}>Neurological</option>
+					<option value="Pediatric" {% if physio.specialty == "Pediatric" %}selected{% endif %}>Pediatric</option>
+					<option value="Geriatric" {% if physio.specialty == "Geriatric" %}selected{% endif %}>Geriatric</option>
+					<option value="Oncological" {% if physio.specialty == "Oncological" %}selected{% endif %}>Oncological</option>
+				</select>
+			</div>
+			<div class="form-group col-md-6 align-self-end">
+				<button type="submit" class="btn btn-primary">Search</button>
+			</div>
+		</div>
+	</form>
+
 	<table width="100%">
 		{% for physio in physios %}
 			<tr>
@@ -15,11 +34,13 @@
 					<td class="impar">{{ physio.name }}</td>
 				{% endif %}
 				<td>
-					<a class="btn btn-primary" href="/physios/edit/{{ physio._id }}">Edit</a>
-					<form style="display:inline" action="/physios/{{ physio._id }}" method="post">
-						<input type="hidden" name="_method" value="delete"/>
-						<button type="submit" class="btn btn-danger">Delete</button>
-					</form>
+					{% if session.user and(session.user.rol == 'admin') %}
+						<a class="btn btn-primary" href="/physios/{{ physio._id }}/edit">Edit</a>
+						<form style="display:inline" action="/physios/{{ physio._id }}" method="post">
+							<input type="hidden" name="_method" value="delete"/>
+							<button type="submit" class="btn btn-danger">Delete</button>
+						</form>
+					{% endif %}
 					<a class="btn btn-success" href="/physios/{{ physio._id }}">Details</a>
 
 				</td>
@@ -30,5 +51,9 @@
 			</tr>
 		{% endfor %}
 	</table>
+	<br>
+	{% if session.user and(session.user.rol == 'admin') %}
+		<a class="btn btn-dark" href="/physios/new">New Physio</a>
+	{% endif %}
 
 {% endblock %}

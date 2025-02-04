@@ -1,0 +1,78 @@
+{% extends "base.njk" %}
+
+{% block contenido %}
+	<div class="container mt-5">
+		<h1 class="mb-4">Add Appointment</h1>
+
+		<h2 class="mb-3">Patient Information</h2>
+		<div class="mb-4">
+			<p>
+				<strong>Name:</strong>
+				{{ record.patient.name }}</p>
+			<p>
+				<strong>Surname:</strong>
+				{{ record.patient.surname }}</p>
+		</div>
+
+		<h2 class="mb-3">Appointment Details</h2>
+		<form method="POST" action="/records/{{ record.patient._id }}/appointments">
+			<div class="form-group">
+				<label for="date">Appointment Date:</label>
+				{% if errors.date %}
+					<div class="alert alert-danger">
+						<p>{{ errors.date }}</p>
+					</div>
+				{% endif %}
+				<input type="date" class="form-control" id="date" name="date" required value="{{ appointment.date or '' }}">
+			</div>
+
+			<div class="form-group">
+				<label for="physio">Physiotherapist:</label>
+				{% if errors.physio %}
+					<div class="alert alert-danger">
+						<p>{{ errors.physio }}</p>
+					</div>
+				{% endif %}
+				<select class="form-control" id="physio" name="physio" required>
+					<option value="" {% if not appointment.physio %}selected{% endif %}>Select a physiotherapist</option>
+					{% for physio in physios %}
+						<option value="{{ physio._id }}" {% if appointment.physio == physio._id %}selected{% endif %}>{{ physio.name }}</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			<div class="form-group">
+				<label for="diagnosis">Diagnosis:</label>
+				{% if errors.diagnosis %}
+					<div class="alert alert-danger">
+						<p>{{ errors.diagnosis }}</p>
+					</div>
+				{% endif %}
+				<textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" minlength="10" maxlength="500" required>{{ appointment.diagnosis or '' }}</textarea>
+			</div>
+
+			<div class="form-group">
+				<label for="treatment">Treatment:</label>
+				{% if errors.treatment %}
+					<div class="alert alert-danger">
+						<p>{{ errors.treatment }}</p>
+					</div>
+				{% endif %}
+				<textarea class="form-control" id="treatment" name="treatment" rows="3" required>{{ appointment.treatment or '' }}</textarea>
+			</div>
+
+			<div class="form-group">
+				<label for="observations">Observations (Optional):</label>
+				{% if errors.observations %}
+					<div class="alert alert-danger">
+						<p>{{ errors.observations }}</p>
+					</div>
+				{% endif %}
+				<textarea class="form-control" id="observations" name="observations" rows="3">{{ appointment.observations or '' }}</textarea>
+			</div>
+			<br>
+			<button type="submit" class="btn btn-primary">Add Appointment</button>
+			<a href="/records/{{ record.patient._id }}" class="btn btn-secondary ml-2">Cancel</a>
+		</form>
+	</div>
+{% endblock %}

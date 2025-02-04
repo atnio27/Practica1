@@ -1,0 +1,30 @@
+{% extends "../base.njk" %}
+
+{% block contenido %}
+	<div class="container mt-5">
+		<h1 class="mb-4">Add Physio</h1>
+
+		<form method="POST" action="/physios/" enctype="multipart/form-data">
+			<div class="form-group">
+				<label for="login">Login:</label>
+				{% if errors.login %}
+					<p class="text-danger">{{ errors.login }}</p>
+				{% endif %}
+				<input type="text" class="form-control" id="login" name="login" value="{{ physio.login }}" required>
+			</div>
+
+			<div class="form-group">
+				<label for="password">Password:</label>
+				{% if errors.password %}
+					<p class="text-danger">{{ errors.password }}</p>
+				{% endif %}
+				<input type="password" class="form-control" id="password" name="password" required>
+			</div>
+
+			{% include "../physios/physio_form.njk" %}
+
+			<button type="submit" class="btn btn-primary">Add</button>
+			<a href="/physios/{{ physio._id }}" class="btn btn-secondary ml-2">Cancel</a>
+		</form>
+	</div>
+{% endblock %}

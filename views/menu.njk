@@ -1,11 +1,24 @@
 <div class="alert alert-secondary">
-    <a class="btn btn-dark" href="/patients">Patients list</a>
-    &nbsp;&nbsp;
-    <a class="btn btn-dark" href="/physios">Physios list</a>
-    &nbsp;&nbsp;
-    <a class="btn btn-dark" href="/records">Records list</a>
-    &nbsp;&nbsp;
-    <a class="btn btn-dark" href="/login">Login</a>
-    &nbsp;&nbsp;
-    <a class="btn btn-dark" href="/patients/new">New Patient</a>
+    {% if session.user and(session.user.rol == 'admin' or session.user.rol == 'physio') %}
+        <a class="btn btn-dark" href="/patients">Patients list</a>
+        <a class="btn btn-dark" href="/patients/new">New Patient</a>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    {% if session.user %}
+        <a class="btn btn-dark" href="/physios">Physios list</a>
+    {% endif %}
+    {% if session.user and session.user.rol == 'admin' %}
+        <a class="btn btn-dark" href="/physios/new">New Physio</a>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    {% if session.user and(session.user.rol == 'admin' or session.user.rol == 'physio') %}
+        <a class="btn btn-dark" href="/records">Records list</a>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    {% if session and session.user %}
+        <a class="btn btn-dark" href="/auth/logout">Logout</a>
+    {% else %}
+        <a class="btn btn-dark" href="/auth/login">Login</a>
+    {% endif %}
+
 </div>

@@ -1,44 +1,56 @@
-// const express = require("express");
-// const User = require("../models/users.js");
-// const router = express.Router();
+const express = require("express");
+const User = require("../models/users.js");
+const router = express.Router();
 
-// // Loguear a un usuario
-// router.post("/login", async (req, res) => {
-//     const { login, password } = req.body;
+// .get
+router.get("/login", async (req, res) => {
+    return res.render("login", {
+        title: "Login",
+    });
+});
 
-//     try {
-//         const user = await User.findOne({ login });
+router.get("/logout", async (req, res) => {
+    req.session.destroy();
+    return res.redirect("/auth/login");
+});
 
-//         // Si el usuario no existe o no hay contraseña
-//         if (!user || !password) {
-//             return res.status(401).json({
-//                 error: "Incorrect login",
-//                 result: null,
-//             });
-//         }
+// .post
+router.post("/login", async (req, res) => {
+    const { login, password } = req.body;
+    const errors = {};
 
-//         const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!login) errors.login = "Login is required.";
+    if (!password) errors.password = "Password is required.";
 
-//         // Si la contraseña es incorrecta
-//         if (!isPasswordValid) {
-//             return res.status(401).json({
-//                 error: "Incorrect login",
-//                 result: null,
-//             });
-//         }
+    if (Object.keys(errors).length > 0) {
+        return res.render("login", {
+            title: "Login - Error",
+            errors,
+            patient: { login },
+        });
+    }
 
-//         const token = generateToken(user);
+    try {
+        const user = await User.findOne({ login });
 
-//         return res.status(200).json({
-//             result: token,
-//             error: null,
-//         });
-//     } catch (error) {
-//         return res.status(500).json({
-//             error: "Internal server error" + error,
-//             result: null,
-//         });
-//     }
-// });
+        if (!user || user.password !== password) {
+            return res.render("login", {
+                title: "Login - Error",
+                errors: { login: "Invalid login or password." },
+                patient: { login },
+            });
+        }
 
-// module.exports = router;
+        req.session.user = { login: user.login, rol: user.rol, id: user._id };
+
+        return res.redirect("/patients");
+    } catch (err) {
+        res.status(500).render("error", {
+            title: "Error",
+            error: `An error occurred while logging in.`,
+            code: 500,
+        });
+    }
+});
+
+module.exports = router;

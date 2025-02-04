@@ -5,7 +5,7 @@
 		<h1 class="mb-4">Add Patient</h1>
 
 		<form method="POST" action="/patients/" enctype="multipart/form-data">
-			{# <div class="form-group mb-3">
+			<div class="form-group mb-3">
 				<label for="login">Login:</label>
 				<input type="text" class="form-control" id="login" name="login" value="{{ patient.login }}" required>
 				{% if errors.login %}
@@ -19,7 +19,7 @@
 				{% if errors.password %}
 					<p class="text-danger">{{ errors.password }}</p>
 				{% endif %}
-			</div> #}
+			</div>
 
 			{% include "../patients/patient_form.njk" %}
 

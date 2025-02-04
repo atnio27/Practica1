@@ -1,0 +1,51 @@
+{% extends "../base.njk" %}
+
+{% block contenido %}
+	<div class="container mt-5">
+		<h1 class="mb-4">Create Medical Record</h1>
+
+		<form method="POST" action="/records">
+			<div class="form-group">
+				<label for="patientId">Patient:</label>
+				{% if errors.patient %}
+					<div class="alert alert-danger">
+						<p>{{ errors.patient }}</p>
+					</div>
+				{% endif %}
+				<select class="form-control" id="patientId" name="patientId" required 
+                {% if not patientsWithoutRecords.length or (patientId and not errors.patient) %}disabled{% endif %}>
+					{% if not patientsWithoutRecords.length %}
+						<option value="" selected>No patients without records</option>
+					{% else %}
+						<option value="">Select a patient</option>
+						{% for patient in patientsWithoutRecords %}
+							<option value="{{ patient._id }}" 
+                            {% if patientId and patient._id == patientId %}selected{% endif %}>
+								{{ patient.name }}
+								{{ patient.surname }}
+							</option>
+						{% endfor %}
+					{% endif %}
+				</select>
+
+				{% if patientsWithoutRecords.length and patientId and not errors.patient %}
+					<input type="hidden" name="patientId" value="{{ patientId }}">
+				{% endif %}
+			</div>
+			<br>
+			<div class="form-group">
+				<label for="medicalRecord">Medical Record:</label>
+				{% if errors.medicalRecord %}
+					<div class="alert alert-danger">
+						<p>{{ errors.medicalRecord }}</p>
+					</div>
+				{% endif %}
+				<textarea class="form-control" id="medicalRecord" name="medicalRecord" rows="5" placeholder="Enter medical record information" maxlength="1000">{{ medicalRecord or '' }}</textarea>
+			</div>
+			<br>
+
+			<button type="submit" class="btn btn-primary">Add Record</button>
+			<a href="/records" class="btn btn-secondary ml-2">Cancel</a>
+		</form>
+	</div>
+{% endblock %}

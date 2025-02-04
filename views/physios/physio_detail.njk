@@ -18,6 +18,12 @@
 		<p>
 			<strong>License Number:</strong>
 			{{ physio.licenseNumber }}</p>
+		{% if physio.image %}
+			<strong>Image:</strong>
+			<p><img src="/public/uploads/{{ physio.image }}"></p>
+		{% endif %}
 	</div>
-
+	{% if session.user and(session.user.rol == 'admin') %}
+		<a class="btn btn-primary" href="/physios/{{ physio._id }}/edit">Edit</a>
+	{% endif %}
 {% endblock %}

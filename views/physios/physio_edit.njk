@@ -1,0 +1,15 @@
+{% extends "../base.njk" %}
+
+{% block contenido %}
+	<div class="container mt-5">
+		<h1 class="mb-4">Edit Physio</h1>
+
+		<form method="POST" action="/physios/{{ physio._id }}" enctype="multipart/form-data">
+
+			{% include "../physios/physio_form.njk" %}
+
+			<button type="submit" class="btn btn-primary">Save Changes</button>
+			<a href="/physios/{{ physio._id }}" class="btn btn-secondary ml-2">Cancel</a>
+		</form>
+	</div>
+{% endblock %}

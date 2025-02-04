@@ -1,0 +1,42 @@
+<div class="form-group mb-3">
+	<label for="name">Name:</label>
+	<input type="text" class="form-control" id="name" name="name" value="{{ physio.name }}" required>
+	{% if errors.name %}
+		<p class="text-danger">{{ errors.name }}</p>
+	{% endif %}
+</div>
+
+<div class="form-group mb-3">
+	<label for="surname">Surname:</label>
+	<input type="text" class="form-control" id="surname" name="surname" value="{{ physio.surname }}" required>
+	{% if errors.surname %}
+		<p class="text-danger">{{ errors.surname }}</p>
+	{% endif %}
+</div>
+
+<div class="form-group">
+	<label for="specialty">Specialty:</label>
+	{% if errors.specialty %}
+		<p class="text-danger">{{ errors.specialty }}</p>
+	{% endif %}
+	<select class="form-control" id="specialty" name="specialty" required>
+		<option value="Sports" {% if physio.specialty == "Sports" %}selected{% endif %}>Sports</option>
+		<option value="Neurological" {% if physio.specialty == "Neurological" %}selected{% endif %}>Neurological</option>
+		<option value="Pediatric" {% if physio.specialty == "Pediatric" %}selected{% endif %}>Pediatric</option>
+		<option value="Geriatric" {% if physio.specialty == "Geriatric" %}selected{% endif %}>Geriatric</option>
+		<option value="Oncological" {% if physio.specialty == "Oncological" %}selected{% endif %}>Oncological</option>
+	</select>
+</div>
+
+<div class="form-group">
+	<label for="licenseNumber">License Number:</label>
+	{% if errors.licenseNumber %}
+		<p class="text-danger">{{ errors.licenseNumber }}</p>
+	{% endif %}
+	<input type="text" class="form-control" id="licenseNumber" name="licenseNumber" value="{{ physio.licenseNumber }}" required>
+</div>
+
+<div class="form-group mb-3">
+	<label for="image">Image:</label>
+	<input type="file" class="form-control" name="image"/>
+</div>

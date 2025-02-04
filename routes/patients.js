@@ -1,16 +1,20 @@
+const allowedRoles = require("../utils/auth.js");
+const path = require("path");
+const fs = require("fs");
 const express = require("express");
 
 const upload = require(__dirname + "/../utils/uploads.js");
 const router = express.Router();
 const Patient = require("../models/patient");
 const Record = require("../models/record");
+const User = require("../models/users.js");
 
 // .get
-router.get("/new", (req, res) => {
+router.get("/new", allowedRoles("admin", "physio"), (req, res) => {
     res.render("patients/patient_add");
 });
 
-router.get("/:id/edit", async (req, res) => {
+router.get("/:id/edit", allowedRoles("admin", "physio"), async (req, res) => {
     try {
         const patient = await Patient.findById(req.params.id);
         if (patient) {
@@ -23,20 +27,24 @@ router.get("/:id/edit", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
-    try {
-        const patient = await Patient.findById(req.params.id);
-        if (patient) {
-            res.render("patients/patient_detail", { patient });
-        } else {
-            res.render("error", { error: "Patient not found" });
+router.get(
+    "/:id",
+    allowedRoles("admin", "physio", "patient"),
+    async (req, res) => {
+        try {
+            const patient = await Patient.findById(req.params.id);
+            if (patient) {
+                res.render("patients/patient_detail", { patient });
+            } else {
+                res.render("error", { error: "Patient not found" });
+            }
+        } catch (error) {
+            res.render("error", { error: error });
         }
-    } catch (error) {
-        res.render("error", { error: error });
     }
-});
+);
 
-router.get("/", async (req, res) => {
+router.get("/", allowedRoles("admin", "physio"), async (req, res) => {
     const { name, surname } = req.query;
 
     try {
@@ -87,173 +95,225 @@ router.get("/", async (req, res) => {
 
 // .post
 // edit
-router.post("/:id", upload.upload.single("image"), async (req, res) => {
-    try {
-        const patient = await Patient.findById(req.params.id);
+router.post(
+    "/:id",
+    allowedRoles("admin", "physio"),
+    upload.upload.single("image"),
+    async (req, res) => {
+        try {
+            const patient = await Patient.findById(req.params.id);
 
-        if (patient) {
-            patient.name = req.body.name;
-            patient.surname = req.body.surname;
-            patient.birthDate = req.body.birthDate;
-            patient.address = req.body.address;
-            patient.insuranceNumber = req.body.insuranceNumber;
-            if (req.file) patient.image = req.file.filename;
+            if (patient) {
+                patient.name = req.body.name;
+                patient.surname = req.body.surname;
+                patient.birthDate = req.body.birthDate;
+                patient.address = req.body.address;
+                patient.insuranceNumber = req.body.insuranceNumber;
+                if (req.file) patient.image = req.file.filename;
 
-            await patient.save();
-            res.redirect(req.baseUrl);
-        } else {
-            res.render("error", { error: "Patient not found" });
+                await patient.save();
+                res.redirect(req.baseUrl);
+            } else {
+                res.render("error", { error: "Patient not found" });
+            }
+        } catch (error) {
+            let errors = {
+                general: "Error editing patient",
+            };
+            if (error.errors) {
+                if (error.errors.name) {
+                    errors.name = error.errors.name.message;
+                }
+                if (error.errors.surname) {
+                    errors.surname = error.errors.surname.message;
+                }
+                if (error.errors.birthDate) {
+                    errors.birthDate = error.errors.birthDate.message;
+                }
+                if (error.errors.address) {
+                    errors.address = error.errors.address.message;
+                }
+                if (error.errors.insuranceNumber) {
+                    errors.insuranceNumber =
+                        error.errors.insuranceNumber.message;
+                }
+            }
+
+            res.render("patients/patient_edit", {
+                errors: errors,
+                patient: {
+                    _id: req.params.id,
+                    name: req.body.name,
+                    surname: req.body.surname,
+                    birthDate: req.body.birthDate,
+                    address: req.body.address,
+                    insuranceNumber: req.body.insuranceNumber,
+                    image: req.file ? req.file.filename : patient.image,
+                },
+            });
         }
-    } catch (error) {
-        let errors = {
-            general: "Error editing patient",
-        };
-        if (error.errors) {
-            if (error.errors.name) {
-                errors.name = error.errors.name.message;
-            }
-            if (error.errors.surname) {
-                errors.surname = error.errors.surname.message;
-            }
-            if (error.errors.birthDate) {
-                errors.birthDate = error.errors.birthDate.message;
-            }
-            if (error.errors.address) {
-                errors.address = error.errors.address.message;
-            }
-            if (error.errors.insuranceNumber) {
-                errors.insuranceNumber = error.errors.insuranceNumber.message;
-            }
-        }
-
-        res.render("patients/patient_edit", {
-            errors: errors,
-            patient: {
-                _id: req.params.id,
-                name: req.body.name,
-                surname: req.body.surname,
-                birthDate: req.body.birthDate,
-                address: req.body.address,
-                insuranceNumber: req.body.insuranceNumber,
-                image: req.file ? req.file.filename : patient.image,
-            },
-        });
     }
-});
+);
 
-router.post("/", upload.upload.single("image"), async (req, res) => {
-    const {
-        name,
-        surname,
-        birthDate,
-        address,
-        insuranceNumber,
-        // login,
-        // password,
-    } = req.body;
-
-    try {
-        let image = null;
-        if (req.file) {
-            image = req.file.filename;
-        }
-
-        const newPatient = new Patient({
+router.post(
+    "/",
+    allowedRoles("admin", "physio"),
+    upload.upload.single("image"),
+    async (req, res) => {
+        const {
             name,
             surname,
             birthDate,
             address,
             insuranceNumber,
-            image,
-        });
+            login,
+            password,
+        } = req.body;
 
-        const savedPatient = await newPatient.save();
-
-        // const newUser = new User({
-        //     _id: savedPatient._id,
-        //     login: login,
-        //     password: password,
-        //     rol: ROLES.PATIENT,
-        // });
-
-        // await newUser.save();
-
-        res.status(201).render("patients/patient_detail", {
-            title: `Patient Added - ${savedPatient.name} ${savedPatient.surname}`,
-            patient: savedPatient,
-            message: "Patient successfully added!",
-        });
-    } catch (error) {
-        if (req.file) {
-            // deleteImage(req.file.filename);
-        }
-
-        const errors = {
-            general: "An error occurred while creating the patient.",
-        };
-
-        if (error.name === "ValidationError" || error.code === 11000) {
-            if (error.errors) {
-                if (error.errors.name) errors.name = error.errors.name.message;
-                if (error.errors.surname)
-                    errors.surname = error.errors.surname.message;
-                if (error.errors.birthDate)
-                    errors.birthDate = error.errors.birthDate.message;
-                if (error.errors.insuranceNumber)
-                    errors.insuranceNumber =
-                        error.errors.insuranceNumber.message;
-                if (error.errors.address)
-                    errors.address = error.errors.address.message;
-                if (error.errors.login)
-                    errors.login = error.errors.login.message;
-                if (error.errors.password)
-                    errors.password = error.errors.password.message;
+        try {
+            let image = null;
+            if (req.file) {
+                image = `${req.file.filename}`;
             }
 
-            if (error.code === 11000) {
-                if (error.message.includes("insuranceNumber")) {
-                    errors.insuranceNumber = "Insurance number must be unique.";
-                }
-                if (error.message.includes("login")) {
-                    errors.login = "Login must be unique.";
-                }
-            }
+            const newUser = new User({
+                login,
+                password,
+                rol: "patient",
+            });
 
-            return res.render("patients/patient_add", {
-                title: "Add Patient - Validation Error",
-                patient: {
+            const savedUser = await newUser.save();
+
+            try {
+                const newPatient = new Patient({
+                    _id: savedUser._id,
                     name,
                     surname,
                     birthDate,
                     address,
                     insuranceNumber,
-                    // login,
-                },
-                errors,
+                    image,
+                });
+
+                const savedPatient = await newPatient.save();
+
+                return res.status(201).render("patients/patient_detail", {
+                    title: `Patient Added - ${savedPatient.name} ${savedPatient.surname}`,
+                    patient: savedPatient,
+                    message: "Patient successfully added!",
+                });
+            } catch (error) {
+                await User.findByIdAndDelete(savedUser._id);
+                throw error;
+            }
+        } catch (error) {
+            if (req.file) {
+                deleteImage(req.file.filename);
+            }
+
+            const errors = {
+                general: "An error occurred while processing the request.",
+            };
+
+            if (error.name === "ValidationError" || error.code === 11000) {
+                if (error.errors) {
+                    if (error.errors.name)
+                        errors.name = error.errors.name.message;
+                    if (error.errors.surname)
+                        errors.surname = error.errors.surname.message;
+                    if (error.errors.birthDate)
+                        errors.birthDate = error.errors.birthDate.message;
+                    if (error.errors.insuranceNumber)
+                        errors.insuranceNumber =
+                            error.errors.insuranceNumber.message;
+                    if (error.errors.address)
+                        errors.address = error.errors.address.message;
+                    if (error.errors.login)
+                        errors.login = error.errors.login.message;
+                    if (error.errors.password)
+                        errors.password = error.errors.password.message;
+                }
+
+                if (error.code === 11000) {
+                    if (error.message.includes("insuranceNumber")) {
+                        errors.insuranceNumber =
+                            "Insurance number must be unique.";
+                    }
+                    if (error.message.includes("login")) {
+                        errors.login = "Login must be unique.";
+                    }
+                }
+
+                return res.render("patients/patient_add", {
+                    title: "Add Patient - Validation Error",
+                    patient: {
+                        name,
+                        surname,
+                        birthDate,
+                        address,
+                        insuranceNumber,
+                        login,
+                    },
+                    errors,
+                });
+            }
+
+            res.status(500).render("error", {
+                title: "Internal Server Error",
+                error: "An error occurred while processing the request.",
+                code: 500,
+            });
+        }
+    }
+);
+
+// .delete
+router.delete("/:id", allowedRoles("admin", "physio"), async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const patient = await Patient.findById(id);
+
+        if (!patient) {
+            return res.status(404).render("error", {
+                title: "Patient Not Found",
+                error: `No patient found with ID: ${id}`,
+                code: 404,
             });
         }
 
-        res.status(500).render("error", {
-            title: "Internal Server Error",
-            error: "An error occurred while adding the patient.",
-            code: 500,
-        });
-    }
-});
+        if (patient.image) {
+            deleteImage(patient.image);
+        }
 
-// .delete
-router.delete("/:id", async (req, res) => {
-    try {
-        await Patient.findByIdAndDelete(req.params.id);
+        await Patient.findByIdAndDelete(id);
+        await User.findByIdAndDelete(id);
+
         res.redirect(req.baseUrl);
     } catch (error) {
-        res.render("error", { error: "Error deleting" });
+        res.status(500).render("error", {
+            title: "Internal Server Error",
+            error: `An error occurred while deleting the patient with ID: ${id}`,
+            code: 500,
+        });
     }
 });
 
 const hasRecord = async (patientId) => {
     const record = await Record.findOne({ patient: patientId });
     return !!record;
+};
+
+const deleteImage = (imageName) => {
+    const fullPath = imageName.startsWith("/public/uploads/")
+        ? path.join(process.cwd(), imageName)
+        : path.join(process.cwd(), `/public/uploads/${imageName}`);
+
+    fs.unlink(fullPath, (error) => {
+        if (error) {
+            console.warn(`Failed to delete image at \"${imageName}\".`);
+        }
+    });
 };
 
 module.exports = router;

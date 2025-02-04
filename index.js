@@ -4,10 +4,12 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const nunjucks = require("nunjucks");
 const methodOverride = require("method-override");
+const session = require("express-session");
 
 dotenv.config();
 
 // Entrutadores
+const auth = require("./routes/auth.js");
 const patients = require("./routes/patients.js");
 const physios = require("./routes/physios.js");
 const records = require("./routes/records.js");
@@ -20,6 +22,15 @@ mongoose
 
 // Inicializar Express
 const app = express();
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        expires: new Date(Date.now() + 60 * 60 * 1000),
+    })
+);
 
 // Configuramos motor Nunjucks
 nunjucks.configure("views", {
@@ -44,46 +55,22 @@ app.use(
     })
 );
 app.use("/public", express.static(__dirname + "/public"));
+app.use((req, res, next) => {
+    const noParamUrl = req.originalUrl.split("?")[0];
+    const currentUrl = noParamUrl.split("/")[1];
+    const newMode = noParamUrl.endsWith("new");
+
+    res.locals.session = req.session;
+    res.locals.currentUrl = currentUrl;
+    res.locals.newMode = newMode;
+
+    next();
+});
 app.use(express.static(__dirname + "/node_modules/bootstrap/dist"));
+app.use("/auth", auth);
 app.use("/patients", patients);
 app.use("/physios", physios);
 app.use("/records", records);
 
 // Puesta en marcha del servidor
 app.listen(process.env.PORT);
-
-// const bcrypt = require("bcrypt");
-// const User = require("./models/users.js");
-
-// crearUsuarios();
-
-// async function crearUsuarios() {
-//     try {
-//         // Hashear las contraseñas antes de crear los usuarios
-//         const hashedAdminPassword = await bcrypt.hash("adminPass123", 10);
-//         const hashedPhysioPassword = await bcrypt.hash("physioPass123", 10);
-//         const hashedPatientPassword = await bcrypt.hash("patientPass123", 10);
-
-//         await User.create([
-//             {
-//                 login: "antonioAdmin",
-//                 password: hashedAdminPassword,
-//                 rol: "admin",
-//             },
-//             {
-//                 login: "antonioPhysio",
-//                 password: hashedPhysioPassword,
-//                 rol: "physio",
-//             },
-//             {
-//                 login: "antonioPatient",
-//                 password: hashedPatientPassword,
-//                 rol: "patient",
-//             },
-//         ]);
-
-//         console.log("Usuarios de prueba creados correctamente.");
-//     } catch (error) {
-//         console.error("Error creando usuarios de prueba:", error.message);
-//     }
-// }
