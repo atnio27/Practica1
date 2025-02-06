@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const nunjucks = require("nunjucks");
 const methodOverride = require("method-override");
 const session = require("express-session");
+const User = require("./models/users.js");
 
 dotenv.config();
 
@@ -71,6 +72,24 @@ app.use("/auth", auth);
 app.use("/patients", patients);
 app.use("/physios", physios);
 app.use("/records", records);
+
+User.create([
+    {
+        login: "admin",
+        password: "admin",
+        rol: "admin",
+    },
+    {
+        login: "physio",
+        password: "physio",
+        rol: "physio",
+    },
+    {
+        login: "patient",
+        password: "patient",
+        rol: "patient",
+    },
+]);
 
 // Puesta en marcha del servidor
 app.listen(process.env.PORT);
